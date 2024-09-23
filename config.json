@@ -1,0 +1,8 @@
+{
+	"archivo": "./data/d18512.tsp",
+	"algoritmo": "RandomGreedy",
+	"propiedades": {
+		"semilla": 12345678,
+		"k": 5
+	}
+}
