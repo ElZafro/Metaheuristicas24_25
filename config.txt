@@ -1,0 +1,4 @@
+LIMIT = 5
+SEMILLA = 77688090
+ARCHIVO = a280.tsp
+ALGORITMO = GreedyAleatorio
