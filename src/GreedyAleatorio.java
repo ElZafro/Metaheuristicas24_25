@@ -38,7 +38,7 @@ public class GreedyAleatorio {
         // Construir la solución
         for(int i = 0; i < (n - 1); i++) {
             // Ajustar limitBusqueda si queda menos del tamaño de la lista restante
-            if((n - i - 1) < limitBusqueda) limitBusqueda = n - i - 2;
+            if((n - i - 1) < limitBusqueda) limitBusqueda = Math.max(1, n - i - 2);;
 
             // Generar un número aleatorio entre 1 y limitBusqueda
             int posicion = random.nextInt(limitBusqueda) + 1;
