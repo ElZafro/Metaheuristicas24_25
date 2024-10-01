@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import Algorithms.RandomGreedy;
 import Algorithms.Algorithm;
 import Algorithms.LocalSearch;
+import Algorithms.TabuSearch;
 import Algorithms.Algorithm.Solution;
 import Algorithms.Problem;
 import Utils.Printer;
@@ -90,6 +91,9 @@ public class Config {
 			}
 			case "LocalSearch": {
 				return new LocalSearch(new LocalSearch.Params(properties), startTime);
+			}
+			case "TabuSearch": {
+				return new TabuSearch(new TabuSearch.Params(properties), startTime);
 			}
 			default:
 				throw new Exception("El tipo de algoritmo " + algorithmType + " no está reconocido.");
