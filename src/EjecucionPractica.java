@@ -4,14 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class EjecucionPractica {
-    /*
-    private static int LIMIT = 5;
-
-    private static long SEMILLA = 77688090;
-
-    private final String[] nombresArchivos = {"a280.tsp", "ch130.tsp", "d18512.tsp", "pr144.tsp", "u1060.tsp"};
-     */
-
     public EjecucionPractica() {}
 
     public void exec(){
@@ -34,22 +26,43 @@ public class EjecucionPractica {
             linea = br.readLine();
             long startTime = 0, endTime = 0;
             ArrayList<Integer> solucion = new ArrayList<>();
-            if(linea.split(" ")[2].equals("GreedyAleatorio")){
+            String nombreAlgoritmo = linea.split(" ")[2];
+            if(nombreAlgoritmo.equals("GreedyAleatorio")){
                 startTime = System.nanoTime();
                 solucion = GreedyAleatorio.greedy(AlmacenarDatos.getDistancias().length, AlmacenarDatos.getDistancias(), LIMIT, SEMILLA);
                 endTime = System.nanoTime();
+            } else{
+                if(nombreAlgoritmo.equals("LocalSearch")){
+                    solucion = GreedyAleatorio.greedy(AlmacenarDatos.getDistancias().length, AlmacenarDatos.getDistancias(), LIMIT, SEMILLA);
+                    linea = br.readLine();
+                    int TOTAL_ITERACIONES = Integer.parseInt(linea.split(" ")[2]);
+                    linea = br.readLine();
+                    int ENTORNO_INICIAL = Integer.parseInt(linea.split(" ")[2]);
+                    linea = br.readLine();
+                    int PORCENTAJE_CAMBIO = Integer.parseInt(linea.split(" ")[2]);
+                    linea = br.readLine();
+                    int REDUCCION_ENTORNO = Integer.parseInt(linea.split(" ")[2]);
+                    startTime = System.nanoTime();
+                    solucion = LocalSearch.busquedalocal(solucion, TOTAL_ITERACIONES, ENTORNO_INICIAL, PORCENTAJE_CAMBIO, REDUCCION_ENTORNO);
+                    endTime = System.nanoTime();
+                }
             }
-            long duration = endTime - startTime;
-
-            double costeTotal = 0;
-            for(int j = 0; j < (solucion.size() - 1); ++j){
-                costeTotal += AlmacenarDatos.getDistancias()[solucion.get(j)][solucion.get(j + 1)];
-            }
-            System.out.println("Problema " + nombreArchivo + ":\nCoste de " + costeTotal);
-            System.out.println("Tiempo de ejecución: " + (duration/1_000_000.0) + " milisegundos");
-            System.out.println("Solucion: " + solucion);
+            mostrarResultados(solucion, nombreArchivo, nombreAlgoritmo, (endTime - startTime));
         } catch(IOException e){
             e.printStackTrace();
         }
+    }
+
+    private void mostrarResultados(ArrayList<Integer> solucion, String nombreArchivo, String nombreAlgoritmo, long duracion){
+        double costeTotal = 0;
+        for(int j = 0; j < (solucion.size() - 1); ++j){
+            if(j == (solucion.size()) - 2) costeTotal += AlmacenarDatos.getDistancias()[solucion.get(j)][solucion.get(0)];
+            else costeTotal += AlmacenarDatos.getDistancias()[solucion.get(j)][solucion.get(j + 1)];
+        }
+        System.out.println("Problema " + nombreArchivo);
+        System.out.println("Algoritmo: " + nombreAlgoritmo);
+        System.out.println("Coste de " + costeTotal);
+        System.out.println("Tiempo de ejecución: " + (duracion/1_000_000.0) + " milisegundos");
+        System.out.println("Solucion: " + solucion);
     }
 }

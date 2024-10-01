@@ -18,6 +18,11 @@ public class AlmacenarDatos {
 
     public AlmacenarDatos() {}
 
+    public static void inicializacionDatos(String nombreArchivo) {
+        cargarDatosACiudades(nombreArchivo);
+        calcularDistancias();
+    }
+
     private static void cargarDatosACiudades(String nombreArchivo) {
         String nombre = "data/"+ nombreArchivo;
         try (FileReader fr = new FileReader(nombre)) {
@@ -72,10 +77,5 @@ public class AlmacenarDatos {
                 }
             }
         }
-    }
-
-    public static void inicializacionDatos(String nombreArchivo) {
-        cargarDatosACiudades(nombreArchivo);
-        calcularDistancias();
     }
 }
