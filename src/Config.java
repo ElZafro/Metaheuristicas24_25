@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import Algorithms.RandomGreedy;
 import Algorithms.Algorithm;
+import Algorithms.LocalSearch;
 import Algorithms.Algorithm.Solution;
 import Algorithms.Problem;
 import Utils.Printer;
@@ -46,7 +47,7 @@ public class Config {
 		// String logFileName = createLogFileName(algorithmType, problemFilePath);
 		// Logger.init(logFileName);
 
-		this.algorithm = chooseAlgorithm(algorithmType, problem, properties);
+		this.algorithm = chooseAlgorithm(algorithmType, properties);
 
 		Printer.printlnDebug("Ejecutando " + algorithmType + " sobre el problema " + problemFilePath + ".");
 		// System.out.println("El archivo log se encuentra en " + logFileName);
@@ -80,12 +81,15 @@ public class Config {
 	// return baseLogFileName + index + ".txt";
 	// }
 
-	private Algorithm chooseAlgorithm(String algorithmType, Problem problem, HashMap<String, String> properties)
+	private Algorithm chooseAlgorithm(String algorithmType, HashMap<String, String> properties)
 			throws Exception {
 
 		switch (algorithmType) {
 			case "RandomGreedy": {
-				return new RandomGreedy(new RandomGreedy.Params(properties), problem, startTime);
+				return new RandomGreedy(new RandomGreedy.Params(properties), startTime);
+			}
+			case "LocalSearch": {
+				return new LocalSearch(new LocalSearch.Params(properties), startTime);
 			}
 			default:
 				throw new Exception("El tipo de algoritmo " + algorithmType + " no está reconocido.");

@@ -51,7 +51,7 @@ public abstract class Printer {
 	}
 
 	public static void printExecutionTime(long startTime) {
-		System.out.format("Tiempo de ejecución: %.3fms\n\n", (System.currentTimeMillis() - startTime) * 1e-3);
+		System.out.format("Tiempo de ejecución: %.3fs\n\n", (System.currentTimeMillis() - startTime) * 1e-3);
 	}
 
 	private static void printArray(int[] arr) {

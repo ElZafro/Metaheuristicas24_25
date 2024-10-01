@@ -1,10 +1,12 @@
 package Algorithms;
 
+import java.util.AbstractMap;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 public class RandomGreedy implements Algorithm {
 
@@ -12,7 +14,7 @@ public class RandomGreedy implements Algorithm {
 	final Params params;
 	final long initialTime;
 
-	public RandomGreedy(Params params, Problem problem, long initialTime) {
+	public RandomGreedy(Params params, long initialTime) {
 		this.params = params;
 		this.random = new Random(params.seed);
 		this.initialTime = initialTime;
@@ -23,10 +25,23 @@ public class RandomGreedy implements Algorithm {
 		Solution solution = new Solution(problem.size);
 		Set<Integer> excludedCities = new HashSet<>(problem.size);
 
+		double[] sumDistances = IntStream.range(0, problem.size)
+				.parallel()
+				.mapToDouble(x -> Arrays.stream(problem.distances[x]).sum())
+				.toArray();
+
+		int[] sortedCities = IntStream.range(0, problem.size)
+				.parallel()
+				.mapToObj(i -> new AbstractMap.SimpleEntry<Integer, Double>(i, sumDistances[i]))
+				.sorted((x, y) -> Double.compare(x.getValue(), y.getValue()))
+				.mapToInt((x) -> x.getKey())
+				.toArray();
+
+		solution.assignations[0] = random.nextInt(sortedCities.length);
+
 		for (int i = 0; i < problem.size - 1; i++) {
 			excludedCities.add(solution.assignations[i]);
-			int[] cities = problem.sortedCities[solution.assignations[i]];
-			int randomCity = getRandomCity(cities, this.params.k, excludedCities);
+			int randomCity = getRandomCity(sortedCities, this.params.k, excludedCities);
 			solution.assignations[i + 1] = randomCity;
 		}
 
@@ -48,7 +63,12 @@ public class RandomGreedy implements Algorithm {
 		public final int seed;
 		public final int k;
 
-		public Params(HashMap<String, String> properties) throws Exception {
+		public Params(int seed, int k) {
+			this.seed = seed;
+			this.k = k;
+		}
+
+		public Params(Map<String, String> properties) throws Exception {
 			try {
 				this.seed = Integer.parseInt(properties.get("semilla"));
 				this.k = Integer.parseInt(properties.get("k"));

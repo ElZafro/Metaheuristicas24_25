@@ -1,8 +1,11 @@
 {
-	"archivo": "./data/d18512.tsp",
-	"algoritmo": "RandomGreedy",
+	"archivo": "./data/a280.tsp",
+	"algoritmo": "LocalSearch",
 	"propiedades": {
 		"semilla": 12345678,
+		"maxIteraciones": 5000,
+		"entornoDinamico": 8.0,
+		"reduccionVecindad": 10.0,
 		"k": 5
 	}
 }

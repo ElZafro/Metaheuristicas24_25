@@ -6,11 +6,17 @@ public interface Algorithm {
 
 	public final class Solution {
 		public int[] assignations;
-		public float cost;
+		public double cost;
 
 		public Solution(int size) {
 			this.assignations = new int[size];
 			this.cost = Float.MAX_VALUE;
 		}
+
+		public Solution(Solution other) {
+			this.assignations = other.assignations.clone();
+			this.cost = other.cost;
+		}
 	}
+
 }
