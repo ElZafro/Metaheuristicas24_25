@@ -37,15 +37,20 @@ public class LocalSearch implements Algorithm {
 
 		Solution current = this.greedy.Solve(problem);
 		for (var it = 0; it < this.params.maxIterations; it++) {
-			var vicinity = generateVicinity(current, this.dynamicVicinity);
-			for (Solution solution : vicinity) {
-				if (solution.cost < current.cost) {
-					current = solution;
-				}
-			}
 			if (it % threshold == 0) {
 				Printer.printlnDebug("Iteración " + it + "\t| Tamaño entorno: " + this.dynamicVicinity);
 				this.dynamicVicinity = (this.dynamicVicinity * 90) / 100;
+			}
+
+			final var currentCost = current.cost;
+			var vicinity = generateVicinity(current, this.dynamicVicinity);
+			var bestNeighbour = Arrays.stream(vicinity).filter(x -> x.cost < currentCost).findFirst();
+
+			if (bestNeighbour.isEmpty()) {
+				Printer.printlnDebug("Total iterations: " + it);
+				return current;
+			} else {
+				current = bestNeighbour.get();
 			}
 		}
 
