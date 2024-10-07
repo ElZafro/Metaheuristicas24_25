@@ -41,7 +41,7 @@ public class GreedyAleatorio {
             if((n - i - 1) < limitBusqueda) limitBusqueda = Math.max(1, n - i - 2);;
 
             // Generar un número aleatorio entre 1 y limitBusqueda
-            int posicion = random.nextInt(limitBusqueda) + 1;
+            int posicion = random.nextInt(limitBusqueda + 1) + 1;
 
             // Iterar sobre el TreeSet hasta alcanzar el índice aleatorio `posicion`
             Iterator<Pair> it = sumatorios.iterator();

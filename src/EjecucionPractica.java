@@ -43,7 +43,7 @@ public class EjecucionPractica {
                     linea = br.readLine();
                     int REDUCCION_ENTORNO = Integer.parseInt(linea.split(" ")[2]);
                     startTime = System.nanoTime();
-                    solucion = LocalSearch.busquedalocal(solucion, TOTAL_ITERACIONES, ENTORNO_INICIAL, PORCENTAJE_CAMBIO, REDUCCION_ENTORNO);
+                    solucion = LocalSearch.busquedalocal(solucion, TOTAL_ITERACIONES, ENTORNO_INICIAL, PORCENTAJE_CAMBIO, REDUCCION_ENTORNO, SEMILLA);
                     endTime = System.nanoTime();
                 }
             }
