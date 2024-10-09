@@ -1,12 +1,9 @@
 package Algorithms;
 
-import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.IntStream;
 
-import Utils.Array;
 import Utils.Printer;
 
 public class LocalSearch implements Algorithm {
@@ -43,68 +40,18 @@ public class LocalSearch implements Algorithm {
 			}
 
 			final var currentCost = current.cost;
-			var vicinity = generateVicinity(current, this.dynamicVicinity);
+			var vicinity = current.generateVicinity(this.random, this.problem, this.dynamicVicinity);
 			var bestNeighbour = Arrays.stream(vicinity).filter(x -> x.cost < currentCost).findFirst();
 
 			if (bestNeighbour.isEmpty()) {
 				Printer.printlnDebug("Total iterations: " + it);
 				return current;
 			} else {
-				current = bestNeighbour.get();
+				current.apply(bestNeighbour.get());
 			}
 		}
 
 		return current;
-	}
-
-	private Solution[] generateVicinity(Solution current, int size) {
-		// Solution[] vicinity = new Solution[size];
-
-		// for (int i = 0; i < size; i++) {
-		// vicinity[i] = TwoOpt(current,
-		// this.random.nextInt(current.assignations.length),
-		// this.random.nextInt(current.assignations.length));
-		// }
-
-		// return vicinity;
-
-		// ------------------------------------------------------------------------------------
-		// return IntStream.range(0, size)
-		// .parallel()
-		// .mapToObj(i -> TwoOpt(current,
-		// this.random.nextInt(current.assignations.length),
-		// this.random.nextInt(current.assignations.length)))
-		// .toArray(Solution[]::new);
-		// ------------------------------------------------------------------------------------
-
-		// Es necesario generar los números aleatorios en un único hilo para que el
-		// resultado sea determinista, luego pueden ser distribuidos en otros hilos.
-		@SuppressWarnings("unchecked")
-		AbstractMap.SimpleEntry<Integer, Integer>[] movements = IntStream.range(0, size)
-				.mapToObj(x -> new AbstractMap.SimpleEntry<Integer, Integer>(
-						this.random.nextInt(current.assignations.length),
-						this.random.nextInt(current.assignations.length)))
-				.toArray(AbstractMap.SimpleEntry[]::new);
-
-		// Hacerlo en paralelo es perjudicial para problemas pequeños, pero merece la
-		// pena para los grandes
-		return Arrays.stream(movements)
-				.parallel()
-				.map(x -> TwoOpt(current, x.getKey(), x.getValue()))
-				.toArray(Solution[]::new);
-
-	}
-
-	// TODO: La mayoría de soluciones se descartan, podríamos devolver el cambio +
-	// nuevo coste, y solo cuando es elegido crear la nueva solución
-	private Solution TwoOpt(Solution current, int i, int j) {
-		var cloned = new Solution(current);
-		Array.Swap(cloned.assignations, i, j);
-
-		// cloned.cost = this.problem.calculateCost(cloned.assignations);
-		cloned.cost = this.problem.calculateCostAfterSwap(current, i, j);
-
-		return cloned;
 	}
 
 	public static class Params {

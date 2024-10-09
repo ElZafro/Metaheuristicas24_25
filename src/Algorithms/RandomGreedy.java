@@ -1,6 +1,5 @@
 package Algorithms;
 
-import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,9 +31,9 @@ public class RandomGreedy implements Algorithm {
 
 		int[] sortedCities = IntStream.range(0, problem.size)
 				.parallel()
-				.mapToObj(i -> new AbstractMap.SimpleEntry<Integer, Double>(i, sumDistances[i]))
-				.sorted((x, y) -> Double.compare(x.getValue(), y.getValue()))
-				.mapToInt((x) -> x.getKey())
+				.mapToObj(i -> new City(i, sumDistances[i]))
+				.sorted((x, y) -> Double.compare(x.distance(), y.distance()))
+				.mapToInt((x) -> x.index())
 				.toArray();
 
 		solution.assignations[0] = random.nextInt(sortedCities.length);
@@ -76,5 +75,8 @@ public class RandomGreedy implements Algorithm {
 				throw new Exception("Faltan parámetros en el archivo de configuración para el algoritmo RandomGreedy");
 			}
 		}
+	}
+
+	private record City(int index, double distance) {
 	}
 }

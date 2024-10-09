@@ -6,6 +6,10 @@ import java.util.Locale;
 import java.util.Scanner;
 import java.util.stream.IntStream;
 
+import Algorithms.Algorithm.Neighbour;
+import Algorithms.Algorithm.Solution;
+
+import Utils.IntPair;
 import Utils.Printer;
 
 public class Problem {
@@ -58,39 +62,37 @@ public class Problem {
 		});
 	}
 
-	// TODO: Set i < j from callee so we can remove one condition to check here.
-	public double calculateCostAfterSwap(Algorithm.Solution prevSolution, int i, int j) {
+	private double calculateCostAfterSwap(Algorithm.Solution prevSolution, IntPair pair) {
+
+		int i = pair.first();
+		int j = pair.second();
 
 		var s = prevSolution.assignations;
 		var l = this.size;
 
-		if (j == (i + 1) % l) {
-			return prevSolution.cost
-					- this.distances[s[(i + l - 1) % l]][s[i]]
-					- this.distances[s[j]][s[(j + 1) % l]]
-					+ this.distances[s[(i + l - 1) % l]][s[j]]
-					+ this.distances[s[i]][s[(j + 1) % l]];
+		double costDiff = 0;
+
+		int iPrev = (i + l - 1) % l;
+		int iNext = (i + 1) % l;
+		int jPrev = (j + l - 1) % l;
+		int jNext = (j + 1) % l;
+
+		costDiff -= this.distances[s[iPrev]][s[i]];
+		costDiff -= this.distances[s[i]][s[iNext]];
+		costDiff -= this.distances[s[jPrev]][s[j]];
+		costDiff -= this.distances[s[j]][s[jNext]];
+
+		costDiff += this.distances[s[iPrev]][s[j]];
+		costDiff += this.distances[s[j]][s[iNext]];
+		costDiff += this.distances[s[jPrev]][s[i]];
+		costDiff += this.distances[s[i]][s[jNext]];
+
+		if (iNext == j || jNext == i) {
+			costDiff += this.distances[s[i]][s[j]];
+			costDiff += this.distances[s[j]][s[i]];
 		}
 
-		if (i == (j + 1) % l) {
-			return prevSolution.cost
-					- this.distances[s[(j + l - 1) % l]][s[j]]
-					- this.distances[s[i]][s[(i + 1) % l]]
-					+ this.distances[s[(j + l - 1) % l]][s[i]]
-					+ this.distances[s[j]][s[(i + 1) % l]];
-		}
-
-		return prevSolution.cost
-				- this.distances[s[(i + l - 1) % l]][s[i]]
-				- this.distances[s[i]][s[(i + 1) % l]]
-				- this.distances[s[(j + l - 1) % l]][s[j]]
-				- this.distances[s[j]][s[(j + 1) % l]]
-
-				+ this.distances[s[(i + l - 1) % l]][s[j]]
-				+ this.distances[s[j]][s[(i + 1) % l]]
-				+ this.distances[s[(j + l - 1) % l]][s[i]]
-				+ this.distances[s[i]][s[(j + 1) % l]];
-
+		return prevSolution.cost + costDiff;
 	}
 
 	public double calculateCost(int[] assignations) {
@@ -100,4 +102,11 @@ public class Problem {
 
 		return result;
 	}
+
+	public Neighbour TwoOpt(Solution current, IntPair pair) {
+		return new Neighbour(
+				pair,
+				this.calculateCostAfterSwap(current, pair));
+	}
+
 }
