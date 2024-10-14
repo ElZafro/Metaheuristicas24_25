@@ -4,8 +4,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-import Utils.Array;
-import Utils.IntPair;
+import DataStructures.OrderedIntPair;
 
 public interface Algorithm {
 
@@ -31,7 +30,9 @@ public interface Algorithm {
 		 * del programa. (Excepto la primera)
 		 */
 		public void apply(Neighbour neighbour) {
-			Array.Swap(this.assignations, neighbour.swaps.first(), neighbour.swaps.second());
+			int temp = this.assignations[neighbour.swaps.first()];
+			this.assignations[neighbour.swaps.first()] = this.assignations[neighbour.swaps.second()];
+			this.assignations[neighbour.swaps.second()] = temp;
 			this.cost = neighbour.cost;
 		}
 
@@ -46,11 +47,11 @@ public interface Algorithm {
 		public Neighbour[] generateVicinity(Random random, Problem p, int size) {
 			// Es necesario generar los números aleatorios en un único hilo para que el
 			// resultado sea determinista, luego pueden ser distribuidos en otros hilos.
-			IntPair[] movements = IntStream.range(0, size)
-					.mapToObj(x -> new IntPair(
+			OrderedIntPair[] movements = IntStream.range(0, size)
+					.mapToObj(x -> new OrderedIntPair(
 							random.nextInt(this.assignations.length),
 							random.nextInt(this.assignations.length)))
-					.toArray(IntPair[]::new);
+					.toArray(OrderedIntPair[]::new);
 
 			return Arrays.stream(movements)
 					// Hacerlo en paralelo resulta en peores tiempos de ejecución
@@ -61,10 +62,10 @@ public interface Algorithm {
 	}
 
 	public static final class Neighbour {
-		public final IntPair swaps;
+		public final OrderedIntPair swaps;
 		public final double cost;
 
-		public Neighbour(IntPair swaps, double cost) {
+		public Neighbour(OrderedIntPair swaps, double cost) {
 			this.swaps = swaps;
 			this.cost = cost;
 		}

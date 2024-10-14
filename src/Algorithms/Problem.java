@@ -8,8 +8,7 @@ import java.util.stream.IntStream;
 
 import Algorithms.Algorithm.Neighbour;
 import Algorithms.Algorithm.Solution;
-
-import Utils.IntPair;
+import DataStructures.OrderedIntPair;
 import Utils.Printer;
 
 public class Problem {
@@ -47,7 +46,6 @@ public class Problem {
 			double firsty_city = cities[i][0];
 			double second_city = cities[i][1];
 
-			// distances[i][i] = Double.POSITIVE_INFINITY;
 			distances[i][i] = 0;
 
 			IntStream.range(i + 1, size).forEach(j -> {
@@ -62,7 +60,7 @@ public class Problem {
 		});
 	}
 
-	private double calculateCostAfterSwap(Algorithm.Solution prevSolution, IntPair pair) {
+	private double calculateCostAfterSwap(Algorithm.Solution prevSolution, OrderedIntPair pair) {
 
 		int i = pair.first();
 		int j = pair.second();
@@ -103,7 +101,7 @@ public class Problem {
 		return result;
 	}
 
-	public Neighbour TwoOpt(Solution current, IntPair pair) {
+	public Neighbour TwoOpt(Solution current, OrderedIntPair pair) {
 		return new Neighbour(
 				pair,
 				this.calculateCostAfterSwap(current, pair));
