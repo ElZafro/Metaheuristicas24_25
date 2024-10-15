@@ -1,11 +1,11 @@
 {
-	"archivo": "./data/u1060.tsp",
+	"archivo": "./data/a280.tsp",
 	"algoritmo": "TabuSearch",
 	"propiedades": {
-		"semilla": 12345678,
+		"semilla": 12345,
 		"k": 5,
 		"maxIteraciones": 5000,
-		"entornoDinamico": 8.0,
+		"entornoInicial": 8.0,
 		"reduccionVecindad": 10.0,
 		"estancamiento": 5.0,
 		"numIteracionesReduccionVecindad": 10.0,

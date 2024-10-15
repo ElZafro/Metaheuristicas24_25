@@ -12,7 +12,7 @@ import Algorithms.TabuSearch;
 import Algorithms.Algorithm.Solution;
 import Algorithms.Problem;
 import Utils.Printer;
-// import Utils.Logger;
+import Utils.Logger;
 
 public class Config {
 
@@ -45,13 +45,13 @@ public class Config {
 		var properties = readAlgorithmProperties(config);
 		String algorithmType = readField(config, algorithmPattern);
 
-		// String logFileName = createLogFileName(algorithmType, problemFilePath);
-		// Logger.init(logFileName);
+		String logFileName = createLogFileName(algorithmType, problemFilePath);
+		Logger.init(logFileName);
 
 		this.algorithm = chooseAlgorithm(algorithmType, properties);
 
 		Printer.printlnDebug("Ejecutando " + algorithmType + " sobre el problema " + problemFilePath + ".");
-		// System.out.println("El archivo log se encuentra en " + logFileName);
+		Printer.printlnDebug("El archivo log se encuentra en " + logFileName);
 	}
 
 	public Solution Solve() {
@@ -69,18 +69,16 @@ public class Config {
 		return sb.toString();
 	}
 
-	// private static String createLogFileName(String algorithmType, String
-	// problemFilePath) {
-	// String problemFile =
-	// problemFilePath.substring(problemFilePath.lastIndexOf('/') + 1,
-	// problemFilePath.lastIndexOf('.'));
-	// String baseLogFileName = "./BIN/logs/" + algorithmType + "_" + problemFile +
-	// "_";
-	// int index = 0;
-	// while (new File(baseLogFileName + index + ".txt").exists())
-	// index++;
-	// return baseLogFileName + index + ".txt";
-	// }
+	private static String createLogFileName(String algorithmType, String problemFilePath) {
+		String problemFile = problemFilePath.substring(problemFilePath.lastIndexOf('/') + 1,
+				problemFilePath.lastIndexOf('.'));
+		String baseLogFileName = "./logs/" + algorithmType + "_" + problemFile +
+				"_";
+		int index = 0;
+		while (new File(baseLogFileName + index + ".log").exists())
+			index++;
+		return baseLogFileName + index + ".log";
+	}
 
 	private Algorithm chooseAlgorithm(String algorithmType, HashMap<String, String> properties)
 			throws Exception {

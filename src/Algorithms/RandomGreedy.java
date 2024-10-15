@@ -21,6 +21,7 @@ public class RandomGreedy implements Algorithm {
 
 	@Override
 	public Solution Solve(Problem problem) {
+		// TODO: Logs
 		Solution solution = new Solution(problem.size);
 		Set<Integer> excludedCities = new HashSet<>(problem.size);
 

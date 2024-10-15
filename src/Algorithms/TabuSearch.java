@@ -11,6 +11,7 @@ import java.util.function.ToIntFunction;
 
 import DataStructures.CircularArray;
 import DataStructures.OrderedIntPair;
+import Utils.Logger;
 import Utils.Printer;
 
 public class TabuSearch implements Algorithm {
@@ -36,7 +37,7 @@ public class TabuSearch implements Algorithm {
 
 	public TabuSearch(Params params, long initialTime) {
 		this.params = params;
-		this.dynamicVicinity = (int) (this.params.dynamicVicinity / 100.0 * (float) this.params.maxIterations);
+		this.dynamicVicinity = (int) (this.params.initialVicinity / 100.0 * (float) this.params.maxIterations);
 		this.stagnation = (int) (this.params.stagnation / 100.0 * (float) this.params.maxIterations);
 		this.random = new Random(params.seed);
 		this.initialTime = initialTime;
@@ -47,6 +48,8 @@ public class TabuSearch implements Algorithm {
 	@Override
 	public Solution Solve(Problem problem) {
 
+		Logger.printMessage(this.params.toString());
+
 		this.longMemory = new int[problem.size][problem.size];
 		this.shortMemory = new CircularArray<>(2 * this.params.tabuTenure);
 
@@ -56,10 +59,18 @@ public class TabuSearch implements Algorithm {
 		Solution best = this.greedy.Solve(problem);
 		Solution currentBest = new Solution(best);
 		Solution current = new Solution(currentBest);
+		Logger.printSolution("Solución Inicial", current);
 		int worsenMovements = 0;
 
 		for (var it = 0; it < this.params.maxIterations; it++) {
 			var vicinity = current.generateVicinity(this.random, this.problem, this.dynamicVicinity);
+
+			if (it % threshold == 0) {
+				Logger.printMessage("Tamaño entorno: " + this.dynamicVicinity);
+				Printer.printlnDebug(
+						"Iteración " + it + "\t| Tamaño entorno: " + this.dynamicVicinity + "\t| Óptimo: " + best.cost);
+				this.dynamicVicinity = (this.dynamicVicinity * (int) (100.0 - this.params.vicinitySliceFactor)) / 100;
+			}
 
 			var neighbour = Arrays.stream(vicinity)
 					.sorted((x, y) -> Double.compare(x.cost, y.cost))
@@ -69,29 +80,25 @@ public class TabuSearch implements Algorithm {
 
 			updateShortTerm(current, neighbour.swaps);
 			current.apply(neighbour);
+			Logger.printSolution("Iteración " + (it + 1), current);
 			updateLongTerm(current);
 
 			if (current.cost >= currentBest.cost) {
 				worsenMovements++;
 			} else {
 				currentBest = new Solution(current);
+				Logger.printMessage("Nuevo Mejor Del Momento");
 				if (currentBest.cost < best.cost) {
 					best = new Solution(currentBest);
+					Logger.printMessage("Nuevo Mejor Global");
 				}
 			}
 
 			if (worsenMovements >= this.stagnation) {
-
-				// TODO: Mostrar en log en vez de por consola
-				Printer.printlnDebug("Reinicializando con memoria a largo plazo");
 				current = this.reinitialize();
+				currentBest = new Solution(current);
+				Logger.printMessage("Nuevo Mejor Del Momento");
 				worsenMovements = 0;
-			}
-
-			if (it % threshold == 0) {
-				// TODO: Mostrar en log también
-				Printer.printlnDebug("Iteración " + it + "\t| Tamaño entorno: " + this.dynamicVicinity);
-				this.dynamicVicinity = (this.dynamicVicinity * (int) (100.0 - this.params.vicinitySliceFactor)) / 100;
 			}
 		}
 
@@ -110,7 +117,7 @@ public class TabuSearch implements Algorithm {
 	}
 
 	private Solution generateNewSolution(GenerationStrategy strat) {
-
+		Logger.printMessage("Reinicialización con memoria a largo plazo (" + strat + ")");
 		Solution solution = new Solution(this.problem.size);
 
 		ToIntFunction<OrderedIntPair> pairValueFunction = pair -> this.longMemory[pair.second()][pair.first()];
@@ -180,18 +187,33 @@ public class TabuSearch implements Algorithm {
 		public final int seed;
 		public final int maxIterations;
 		public final float vicinitySliceFactor;
-		public final float dynamicVicinity;
+		public final float initialVicinity;
 		public final float iterationsToDecreaseVicinity;
 		public final int tabuTenure;
 		public final float oscillation;
 		public final float stagnation;
 
+		public String toString() {
+			return """
+					Configuración
+							Semilla: %s
+							Número de iteraciones: %s
+							Tamaño del entorno inicial: %s%% del número de iteraciones
+							Disminución del entorno: Reducir un %s%% de su tamaño
+							Iteraciones para la disminución: Cada %s%% del número de iteraciones
+							Estancamiento: %s%% del número de iteraciones
+							Tenencia tabú: %s
+							Oscilación estratégica: %s%%
+						""".formatted(seed, maxIterations, initialVicinity, vicinitySliceFactor,
+					iterationsToDecreaseVicinity, stagnation, tabuTenure, oscillation);
+		}
+
 		public Params(Map<String, String> properties) throws Exception {
 			try {
 				this.seed = Integer.parseInt(properties.get("semilla"));
 				this.maxIterations = Integer.parseInt(properties.get("maxIteraciones"));
+				this.initialVicinity = Float.parseFloat(properties.get("entornoInicial"));
 				this.vicinitySliceFactor = Float.parseFloat(properties.get("reduccionVecindad"));
-				this.dynamicVicinity = Float.parseFloat(properties.get("entornoDinamico"));
 				this.iterationsToDecreaseVicinity = Float.parseFloat(properties.get("numIteracionesReduccionVecindad"));
 				this.tabuTenure = Integer.parseInt(properties.get("tenenciaTabu"));
 				this.oscillation = Float.parseFloat(properties.get("oscilacionEstrategica"));

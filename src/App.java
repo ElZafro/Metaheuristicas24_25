@@ -1,5 +1,5 @@
 import Algorithms.Algorithm.Solution;
-import Utils.Printer;
+import Utils.*;
 
 public class App {
 	public static void main(String[] args) {
@@ -9,6 +9,8 @@ public class App {
 			Printer.printSolution("Solución final", solution);
 		} catch (Exception e) {
 			Printer.printError(e.getMessage());
+		} finally {
+			Logger.close();
 		}
 	}
 }

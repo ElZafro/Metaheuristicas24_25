@@ -28,6 +28,7 @@ public class LocalSearch implements Algorithm {
 
 	@Override
 	public Solution Solve(Problem problem) {
+		// TODO: Logs
 
 		var threshold = (int) (this.params.vicinitySliceFactor / 100.0 * (float) this.params.maxIterations);
 		this.problem = problem;
