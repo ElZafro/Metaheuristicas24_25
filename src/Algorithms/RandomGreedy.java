@@ -7,6 +7,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.IntStream;
 
+import Utils.Logger;
+
 public class RandomGreedy implements Algorithm {
 
 	final Random random;
@@ -21,10 +23,14 @@ public class RandomGreedy implements Algorithm {
 
 	@Override
 	public Solution Solve(Problem problem) {
-		// TODO: Logs
+
+		Logger.printMessage(this.params.toString());
+
 		Solution solution = new Solution(problem.size);
 		Set<Integer> excludedCities = new HashSet<>(problem.size);
 
+		// La venta de utilizar `.parallel` solo es beneficiosa para problemas muy
+		// grandes, para los pequeños resulta algo perjudicial
 		double[] sumDistances = IntStream.range(0, problem.size)
 				.parallel()
 				.mapToDouble(x -> Arrays.stream(problem.distances[x]).sum())
@@ -47,6 +53,8 @@ public class RandomGreedy implements Algorithm {
 
 		solution.cost = problem.calculateCost(solution.assignations);
 
+		Logger.printSolution("Solución", solution);
+
 		return solution;
 	}
 
@@ -66,6 +74,15 @@ public class RandomGreedy implements Algorithm {
 		public Params(int seed, int k) {
 			this.seed = seed;
 			this.k = k;
+		}
+
+		@Override
+		public String toString() {
+			return """
+					Configuración
+							Semilla: %s
+							K: %s
+						""".formatted(seed, k);
 		}
 
 		public Params(Map<String, String> properties) throws Exception {

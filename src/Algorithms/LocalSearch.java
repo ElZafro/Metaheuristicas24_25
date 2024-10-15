@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
 
-import Utils.Printer;
+import Utils.*;
 
 public class LocalSearch implements Algorithm {
 
@@ -19,7 +19,7 @@ public class LocalSearch implements Algorithm {
 
 	public LocalSearch(Params params, long initialTime) {
 		this.params = params;
-		this.dynamicVicinity = (int) (this.params.dynamicVicinity / 100.0 * (float) this.params.maxIterations);
+		this.dynamicVicinity = (int) (this.params.initialVicinity / 100.0 * (float) this.params.maxIterations);
 		this.random = new Random(params.seed);
 		this.initialTime = initialTime;
 
@@ -28,16 +28,23 @@ public class LocalSearch implements Algorithm {
 
 	@Override
 	public Solution Solve(Problem problem) {
-		// TODO: Logs
 
-		var threshold = (int) (this.params.vicinitySliceFactor / 100.0 * (float) this.params.maxIterations);
+		Logger.printMessage(this.params.toString());
+
 		this.problem = problem;
+		var threshold = (int) (this.params.iterationsToDecreaseVicinity / 100.0 * (float) this.params.maxIterations);
 
+		Logger.printMessage("\nGreedy para solución inicial: ");
 		Solution current = this.greedy.Solve(problem);
+
+		Logger.printMessage("\nEjecución de Búsqueda Local");
+		Logger.printMessage("Tamaño inicial del entorno: " + this.dynamicVicinity + "\t| Óptimo: " + current.cost);
 		for (var it = 0; it < this.params.maxIterations; it++) {
-			if (it % threshold == 0) {
-				Printer.printlnDebug("Iteración " + it + "\t| Tamaño entorno: " + this.dynamicVicinity);
-				this.dynamicVicinity = (this.dynamicVicinity * 90) / 100;
+			if (it > 0 && it % threshold == 0) {
+				this.dynamicVicinity = (this.dynamicVicinity * (int) (100.0 - this.params.vicinitySliceFactor)) / 100;
+				Logger.printMessage("Tamaño entorno: " + this.dynamicVicinity);
+				Printer.printlnDebug("Iteración " + it + "\t| Tamaño entorno: " + this.dynamicVicinity +
+						"\t| Óptimo: " + current.cost);
 			}
 
 			final var currentCost = current.cost;
@@ -45,11 +52,13 @@ public class LocalSearch implements Algorithm {
 			var bestNeighbour = Arrays.stream(vicinity).filter(x -> x.cost < currentCost).findFirst();
 
 			if (bestNeighbour.isEmpty()) {
-				Printer.printlnDebug("Total iterations: " + it);
+				Printer.printlnDebug("Iteraciones realizadas: " + it);
 				return current;
 			} else {
 				current.apply(bestNeighbour.get());
 			}
+
+			Logger.printSolution("Iteración " + (it + 1), current);
 		}
 
 		return current;
@@ -59,14 +68,28 @@ public class LocalSearch implements Algorithm {
 		public final int seed;
 		public final int maxIterations;
 		public final float vicinitySliceFactor;
-		public final float dynamicVicinity;
+		public final float initialVicinity;
+		public final float iterationsToDecreaseVicinity;
+
+		public String toString() {
+			return """
+					Configuración
+							Semilla: %s
+							Número de iteraciones: %s
+							Tamaño del entorno inicial: %s%% del número de iteraciones
+							Disminución del entorno: Reducir un %s%% de su tamaño
+							Iteraciones para la disminución: Cada %s%% del número de iteraciones
+						""".formatted(seed, maxIterations, initialVicinity,
+					vicinitySliceFactor, iterationsToDecreaseVicinity);
+		}
 
 		public Params(Map<String, String> properties) throws Exception {
 			try {
 				this.seed = Integer.parseInt(properties.get("semilla"));
 				this.maxIterations = Integer.parseInt(properties.get("maxIteraciones"));
 				this.vicinitySliceFactor = Float.parseFloat(properties.get("reduccionVecindad"));
-				this.dynamicVicinity = Float.parseFloat(properties.get("entornoDinamico"));
+				this.initialVicinity = Float.parseFloat(properties.get("entornoInicial"));
+				this.iterationsToDecreaseVicinity = Float.parseFloat(properties.get("numIteracionesReduccionVecindad"));
 			} catch (Exception e) {
 				throw new Exception("Faltan parámetros en el archivo de configuración para el algoritmo LocalSearch");
 			}

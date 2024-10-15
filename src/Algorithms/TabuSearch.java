@@ -11,8 +11,7 @@ import java.util.function.ToIntFunction;
 
 import DataStructures.CircularArray;
 import DataStructures.OrderedIntPair;
-import Utils.Logger;
-import Utils.Printer;
+import Utils.*;
 
 public class TabuSearch implements Algorithm {
 
@@ -56,20 +55,25 @@ public class TabuSearch implements Algorithm {
 		var threshold = (int) (this.params.iterationsToDecreaseVicinity / 100.0 * (float) this.params.maxIterations);
 		this.problem = problem;
 
+		Logger.printMessage("\nGreedy para solución inicial: ");
 		Solution best = this.greedy.Solve(problem);
 		Solution currentBest = new Solution(best);
 		Solution current = new Solution(currentBest);
-		Logger.printSolution("Solución Inicial", current);
 		int worsenMovements = 0;
+
+		Logger.printMessage("\nEjecución de Búsqueda Tabú");
+		Logger.printMessage("Tamaño inicial del entorno: " + this.dynamicVicinity);
+		Printer.printlnDebug(
+				"Iteración " + 0 + "\t| Tamaño entorno: " + this.dynamicVicinity + "\t| Óptimo: " + best.cost);
 
 		for (var it = 0; it < this.params.maxIterations; it++) {
 			var vicinity = current.generateVicinity(this.random, this.problem, this.dynamicVicinity);
 
-			if (it % threshold == 0) {
+			if (it > 0 && it % threshold == 0) {
+				this.dynamicVicinity = (this.dynamicVicinity * (int) (100.0 - this.params.vicinitySliceFactor)) / 100;
 				Logger.printMessage("Tamaño entorno: " + this.dynamicVicinity);
 				Printer.printlnDebug(
 						"Iteración " + it + "\t| Tamaño entorno: " + this.dynamicVicinity + "\t| Óptimo: " + best.cost);
-				this.dynamicVicinity = (this.dynamicVicinity * (int) (100.0 - this.params.vicinitySliceFactor)) / 100;
 			}
 
 			var neighbour = Arrays.stream(vicinity)
@@ -193,6 +197,7 @@ public class TabuSearch implements Algorithm {
 		public final float oscillation;
 		public final float stagnation;
 
+		@Override
 		public String toString() {
 			return """
 					Configuración

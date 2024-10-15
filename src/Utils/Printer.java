@@ -28,7 +28,7 @@ public abstract class Printer {
 		else
 			printSummarizedArray(individual);
 
-		System.out.println("Coste: " + individual.cost + "\n");
+		System.out.println("Coste: " + String.format("%.03f", individual.cost));
 	}
 
 	private static void printSummarizedArray(Solution individual) {
