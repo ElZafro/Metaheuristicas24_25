@@ -9,6 +9,7 @@ import java.util.stream.IntStream;
 import java.util.Comparator;
 import java.util.function.ToIntFunction;
 
+import DataStructures.CircularArray;
 import DataStructures.OrderedIntPair;
 import Utils.Printer;
 
@@ -24,8 +25,14 @@ public class TabuSearch implements Algorithm {
 	private int stagnation;
 	private Problem problem;
 
-	private int[][] memory;
-	private HashSet<OrderedIntPair> recentMoves;
+	// Por diseño, solo utilizamos la mitad de la matriz (j > i)
+	// Esto significa que el arco (3-4) comparte celda con el (4-3)
+	private int[][] longMemory;
+
+	// Almacenamos movimientos e índices indistintivamente
+	// Si el movimiento que cambia la posición 0 con la 1 es tabú,
+	// También lo será cambiar la ciudad 0 por la 1.
+	private CircularArray<OrderedIntPair> shortMemory;
 
 	public TabuSearch(Params params, long initialTime) {
 		this.params = params;
@@ -40,8 +47,8 @@ public class TabuSearch implements Algorithm {
 	@Override
 	public Solution Solve(Problem problem) {
 
-		this.memory = new int[problem.size][problem.size];
-		this.recentMoves = new HashSet<>(2 * this.params.tabuTenure);
+		this.longMemory = new int[problem.size][problem.size];
+		this.shortMemory = new CircularArray<>(2 * this.params.tabuTenure);
 
 		var threshold = (int) (this.params.iterationsToDecreaseVicinity / 100.0 * (float) this.params.maxIterations);
 		this.problem = problem;
@@ -56,7 +63,7 @@ public class TabuSearch implements Algorithm {
 
 			var neighbour = Arrays.stream(vicinity)
 					.sorted((x, y) -> Double.compare(x.cost, y.cost))
-					.filter(x -> !this.recentMoves.contains(x.swaps))
+					.filter(x -> !this.shortMemory.contains(x.swaps))
 					.findFirst()
 					.get();
 
@@ -106,7 +113,7 @@ public class TabuSearch implements Algorithm {
 
 		Solution solution = new Solution(this.problem.size);
 
-		ToIntFunction<OrderedIntPair> pairValueFunction = pair -> this.memory[pair.second()][pair.first()];
+		ToIntFunction<OrderedIntPair> pairValueFunction = pair -> this.longMemory[pair.second()][pair.first()];
 		Comparator<OrderedIntPair> comparator = (strat == GenerationStrategy.Intensification)
 				? Comparator.comparingInt(pairValueFunction)
 				: Comparator.comparingInt(pairValueFunction).reversed();
@@ -136,7 +143,7 @@ public class TabuSearch implements Algorithm {
 	private int findNextCity(int lastCity, Set<Integer> excludedCities, Comparator<OrderedIntPair> comparator) {
 		return IntStream.range(0, this.problem.size)
 				.filter(x -> !excludedCities.contains(x))
-				.filter(x -> this.memory[Math.max(x, lastCity)][Math.min(x, lastCity)] != 0)
+				.filter(x -> this.longMemory[Math.max(x, lastCity)][Math.min(x, lastCity)] != 0)
 				.boxed()
 				.max(Comparator.comparing(x -> new OrderedIntPair(Math.max(x, lastCity), Math.min(x, lastCity)),
 						comparator))
@@ -150,34 +157,23 @@ public class TabuSearch implements Algorithm {
 		OrderedIntPair last = new OrderedIntPair(
 				current.assignations[0],
 				current.assignations[current.assignations.length - 1]);
-		this.memory[last.second()][last.first()]++;
+		this.longMemory[last.second()][last.first()]++;
 
 		for (int i = 0; i < current.assignations.length - 1; i++) {
 			OrderedIntPair p = new OrderedIntPair(current.assignations[i], current.assignations[i + 1]);
-			this.memory[p.second()][p.first()]++;
+			this.longMemory[p.second()][p.first()]++;
 		}
 
 	}
 
 	private void updateShortTerm(Solution current, OrderedIntPair pair) {
 
-		// Recorrer la matriz entera despues de cada iteracion es demasiado
-		// costoso, podemos guardarnos los ultimos cambios e ir reduciendo sin volver a
-		// explorarla entera
-		for (var p : this.recentMoves) {
-			if (this.memory[p.first()][p.second()] != 0)
-				this.memory[p.first()][p.second()]--;
-		}
-		this.recentMoves.removeIf(p -> this.memory[p.first()][p.second()] == 0);
-
 		OrderedIntPair cities = new OrderedIntPair(
 				current.assignations[pair.first()],
 				current.assignations[pair.second()]);
-		this.memory[pair.first()][pair.second()] = this.params.tabuTenure;
-		this.memory[cities.first()][cities.second()] = this.params.tabuTenure;
 
-		this.recentMoves.add(pair);
-		this.recentMoves.add(cities);
+		this.shortMemory.add(pair);
+		this.shortMemory.add(cities);
 	}
 
 	public static class Params {
