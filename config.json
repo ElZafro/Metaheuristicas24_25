@@ -1,0 +1,15 @@
+{
+	"archivo": "./data/a280.tsp",
+	"algoritmo": "TabuSearch",
+	"propiedades": {
+		"semilla": 12345,
+		"k": 5,
+		"maxIteraciones": 5000,
+		"entornoInicial": 8.0,
+		"reduccionVecindad": 10.0,
+		"estancamiento": 5.0,
+		"numIteracionesReduccionVecindad": 10.0,
+		"tenenciaTabu": 10,
+		"oscilacionEstrategica": 50.0
+	}
+}
